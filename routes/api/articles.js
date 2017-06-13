@@ -67,7 +67,7 @@ router.get('/', auth.optional, (req, res, next) => {
                           .sort({createdAt: 'desc'})
                           .populate('author');
 
-    return Promise.all([
+    Promise.all([
       findArticles.exec(),
       req.payload ? User.findById(req.payload.id) : null
     ]).then(([articles, user]) => {

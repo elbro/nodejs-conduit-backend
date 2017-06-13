@@ -1,5 +1,4 @@
-var fs = require('fs'),
-    http = require('http'),
+var http = require('http'),
     path = require('path'),
     methods = require('methods'),
     express = require('express'),
@@ -8,7 +7,8 @@ var fs = require('fs'),
     cors = require('cors'),
     passport = require('passport'),
     errorhandler = require('errorhandler'),
-    mongoose = require('mongoose');
+    mongoose = require('mongoose'),
+    config = require('config');
 
 var isProduction = process.env.NODE_ENV === 'production';
 
@@ -18,7 +18,8 @@ var app = express();
 app.use(cors());
 
 // Normal express config defaults
-app.use(require('morgan')('dev'));
+if (process.env.NODE_ENV !== 'test') { app.use(require('morgan')('dev')); }
+
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
@@ -34,8 +35,9 @@ if (!isProduction) {
 if(isProduction){
   mongoose.connect(process.env.MONGODB_URI);
 } else {
-  mongoose.connect('mongodb://localhost/conduit');
-  mongoose.set('debug', true);
+  mongoose.connect(config.DBHost);
+  
+  if (process.env.NODE_ENV !== 'test') { mongoose.set('debug', true); }
 }
 
 require('./models/User');
@@ -83,3 +85,5 @@ app.use(function(err, req, res, next) {
 var server = app.listen( process.env.PORT || 3000, function(){
   console.log('Listening on port ' + server.address().port);
 });
+
+module.exports = server;
